@@ -17,7 +17,22 @@ async_database_url = os.getenv("ASYNC_DATABASE_URL")
 raw_database_url = async_database_url or os.getenv("DATABASE_URL")
 
 if not raw_database_url:
-    raise ValueError("Either ASYNC_DATABASE_URL or DATABASE_URL environment variable must be set")
+    error_msg = """
+    --------------------------------------------------------------------------------
+    ERROR: Database URL is not set.
+    Please set the ASYNC_DATABASE_URL or DATABASE_URL environment variable.
+    
+    For Render deployment, make sure to set this in your service's Environment:
+    1. Go to your service on the Render dashboard.
+    2. Navigate to the 'Environment' tab.
+    3. Add a new environment variable with the key 'ASYNC_DATABASE_URL' or 'DATABASE_URL'
+       and the correct database connection string as the value.
+       
+    For Supabase, the format is typically: 
+    postgresql+psycopg://<service-role-user>:<password>@<project-id>.aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+    --------------------------------------------------------------------------------
+    """
+    raise ValueError(error_msg)
 
 # Ensure we always use the async driver (psycopg v3) for async operations
 if not "+psycopg" in raw_database_url:

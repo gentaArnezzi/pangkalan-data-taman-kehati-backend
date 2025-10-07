@@ -86,19 +86,31 @@ async def _db_ping():
     try:
         async with engine.connect() as conn:
             # Test basic connection
-            val = await conn.scalar(text("select 1"))
-            logger.info("DB ping OK: %s", val)
-            
+            try:
+                val = await conn.scalar(text("select 1"))
+                logger.info("DB ping OK: %s", val)
+            except Exception as e:
+                logger.error("DB basic connection failed: %s", str(e))
+                raise
+
             # Test PostGIS availability
-            postgis_version = await conn.scalar(text("SELECT PostGIS_version()"))
-            logger.info("PostGIS available: %s", postgis_version)
-            
+            try:
+                postgis_version = await conn.scalar(text("SELECT PostGIS_version()"))
+                logger.info("PostGIS available: %s", postgis_version)
+            except Exception as e:
+                logger.error("PostGIS check failed: %s", str(e))
+                logger.error("Please ensure the PostGIS extension is installed and enabled in your database.")
+                raise
+
             # Test FTS (Full Text Search) availability
-            fts_test = await conn.scalar(text("SELECT to_tsvector('indonesian', 'test')"))
-            logger.info("FTS (Indonesian) available: %s", fts_test is not None)
-            
+            try:
+                fts_test = await conn.scalar(text("SELECT to_tsvector('indonesian', 'test')"))
+                logger.info("FTS (Indonesian) available: %s", fts_test is not None)
+            except Exception as e:
+                logger.error("FTS (Indonesian) check failed: %s", str(e))
+                logger.error("Please ensure the 'indonesian' FTS dictionary is installed in your database.")
+                raise
+
     except Exception as e:
         logger.error("DB ping failed: %s", str(e))
-        logger.error("Please check your DATABASE_URL in the .env file")
-        logger.error("For Supabase, the format is typically: postgresql+psycopg://<service-role-user>:<password>@<project-id>.aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres")
         raise
