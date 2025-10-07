@@ -1,0 +1,18 @@
+services:
+- type: web
+  name: taman-kehati-api
+  runtime: docker
+  repo: .  # Deploy from the root of the repository
+  plan: free  # Use free plan (change to paid plan if needed)
+  envVars:
+    - key: DATABASE_URL
+      sync: false  # Don't sync this value, it will be set manually in dashboard
+    - key: ASYNC_DATABASE_URL
+      sync: false
+    - key: SECRET_KEY
+      sync: false
+    - key: ENV
+      value: production
+    - key: DEBUG
+      value: false
+  autoDeploy: true  # Automatically deploy when changes are pushed
